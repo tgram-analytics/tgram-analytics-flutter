@@ -1,6 +1,6 @@
 # tgram-analytics Flutter SDK
 
-Lightweight Dart/Flutter SDK for [tgram-analytics](https://github.com/tgram-analytics). Track events and pageviews from your Flutter app or Dart backend.
+Lightweight Dart/Flutter SDK for [tgram-analytics](https://tgram-analytics.com). Track events and pageviews from your Flutter app or Dart backend.
 
 - **Pre-init buffering** — call `TGA.track()` anywhere, even before `init()`. Events are queued and flushed automatically.
 - **Never throws at runtime** — double `init()` logs a warning, pre-init calls are buffered, network errors are swallowed.
@@ -9,12 +9,17 @@ Lightweight Dart/Flutter SDK for [tgram-analytics](https://github.com/tgram-anal
 
 ---
 
+## Two ways to use it
+
+- **Managed (hosted)** — use the free hosted service at [tgram-analytics.com](https://tgram-analytics.com). Get a `proj_` API key in seconds by messaging [@MyTelegramAnalyticsBot](https://t.me/MyTelegramAnalyticsBot) on Telegram and sending `/add myapp.com`. Server URL: `https://api.tgram-analytics.com`. Free tier includes 1 project.
+- **Self-hosted** — run your own server from the [server repo](https://github.com/tgram-analytics/server) and create keys via your own Telegram bot.
+
+---
+
 ## Prerequisites
 
-1. A running tgram-analytics server. See the [server repo](https://github.com/tgram-analytics/server) for setup instructions.
-2. A project API key. Create one by sending `/add myapp.com` to the Telegram bot. The bot replies with a key that starts with `proj_`.
-
-Get a free `proj_` API key from [@MyTelegramAnalyticsBot](https://t.me/MyTelegramAnalyticsBot) on Telegram (1 project free), or [self-host the server](https://github.com/tgram-analytics/server) and create keys via your own bot.
+1. A tgram-analytics server — either the [managed instance](https://tgram-analytics.com) or your own [self-hosted server](https://github.com/tgram-analytics/server).
+2. A project API key starting with `proj_`. Create one by sending `/add myapp.com` to your bot ([@MyTelegramAnalyticsBot](https://t.me/MyTelegramAnalyticsBot) for the managed version).
 
 ---
 
@@ -40,8 +45,10 @@ import 'package:tgram_analytics/tgram_analytics.dart';
 // Track events anywhere — even before init:
 TGA.track('signup', 'session-123', properties: {'plan': 'pro'});
 
-// Initialize once (e.g. in main):
-TGA.init('proj_xxx', 'https://analytics.example.com');
+// Initialize once (e.g. in main) — use the managed instance:
+TGA.init('proj_xxx', 'https://api.tgram-analytics.com');
+// ...or point at your self-hosted server:
+// TGA.init('proj_xxx', 'https://analytics.example.com');
 // ^ buffered events are flushed automatically with the real API key
 
 // Track more events:
@@ -180,6 +187,7 @@ MIT — see [LICENSE](./LICENSE).
 ## Links
 
 - Website: <https://tgram-analytics.com>
+- Managed bot: [@MyTelegramAnalyticsBot](https://t.me/MyTelegramAnalyticsBot)
 - Server (API): <https://github.com/tgram-analytics/server>
 - JS SDK: <https://github.com/tgram-analytics/tgram-analytics-js>
 - Python SDK: <https://github.com/tgram-analytics/tgram-analytics-py>

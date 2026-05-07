@@ -25,14 +25,10 @@ Lightweight Dart/Flutter SDK for [tgram-analytics](https://tgram-analytics.com).
 
 ## Install
 
-```yaml
-# pubspec.yaml
-dependencies:
-  tgram_analytics: ^0.1.0
-```
-
 ```bash
-dart pub get
+flutter pub add tgram_analytics
+# or, for a pure Dart project:
+dart pub add tgram_analytics
 ```
 
 ---

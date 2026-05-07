@@ -1,3 +1,7 @@
+## 0.1.1
+
+- Docs: README mentions the managed hosted service (tgram-analytics.com) and the Telegram bot (@MyTelegramAnalyticsBot) alongside the self-hosted option.
+
 ## 0.1.0
 
 - Initial release.

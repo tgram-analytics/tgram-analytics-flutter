@@ -1,13 +1,25 @@
 name: Publish to pub.dev
 
-# Fires automatically when a Git tag matching ``v<version>`` is pushed.
-# Creating a GitHub release with that tag is the recommended way to cut
-# a version (the release machinery pushes the tag for us).
+# pub.dev's automated-publishing policy on this package only accepts
+# OIDC tokens whose event claim is ``workflow_dispatch``. Both
+# ``release`` and ``push`` events are rejected with:
 #
-# IMPORTANT: pub.dev's OIDC policy rejects ``release`` events with
-# "this token originates from a 'release' event" — only ``push`` (tag)
-# and ``workflow_dispatch`` event tokens are honoured. See:
-# https://dart.dev/go/publishing-from-github
+#   "publishing is not allowed from 'release' events"
+#   "publishing is not allowed from 'push' events"
+#
+# See https://dart.dev/go/publishing-from-github
+#
+# To keep the "create a GitHub release → package auto-publishes" UX,
+# this workflow has two jobs:
+#
+# 1. ``trigger`` — fires on ``release: published``, then re-dispatches
+#    this same workflow at the release's tag via the GitHub API. The
+#    new run sees ``event_name == 'workflow_dispatch'`` and so its
+#    OIDC token is accepted by pub.dev.
+# 2. ``publish`` — fires on ``workflow_dispatch`` (either from the
+#    trigger above or a manual click in the Actions tab). Delegates
+#    to the official reusable workflow which handles dry-run, publish,
+#    and tag/version verification.
 #
 # Auth: pub.dev automated publishing via OIDC. One-time setup on pub.dev:
 #   1. Sign in to pub.dev with the publisher account that owns the package.
@@ -17,28 +29,41 @@ name: Publish to pub.dev
 #        Tag pattern: v{{version}}
 #        Require GitHub Actions environment: pub.dev
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
-  # Allow manual re-runs from the Actions tab for a specific ref. Pick the
-  # tag you want to (re-)publish under "Use workflow from".
+  release:
+    types: [published]
+  # Allow manual re-runs from the Actions tab for a specific ref. Pick
+  # the tag you want to (re-)publish under "Use workflow from".
   workflow_dispatch:
 
 jobs:
-  publish:
+  # Bridges the ``release: published`` event into a fresh
+  # ``workflow_dispatch`` run, so the OIDC token carries the event type
+  # pub.dev requires. No-op on direct ``workflow_dispatch`` invocations.
+  trigger:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write  # required for OIDC token exchange with pub.dev
-    # The reusable workflow from the official Dart team handles
-    # `dart pub get`, `dart pub publish --dry-run`, and `dart pub publish -f`
-    # against the OIDC-authenticated session. See
-    # https://github.com/dart-lang/setup-dart/blob/v1/.github/workflows/publish.yml
-    #
-    # `environment: pub.dev` is passed through to the inner job so it binds
-    # to the GitHub Actions environment named `pub.dev`. That match is
-    # required because the pub.dev automated-publishing config above is set
-    # with "Require GitHub Actions environment: pub.dev" — without this
-    # `with:` block the inner job runs with no environment and the OIDC
-    # token exchange is rejected by pub.dev.
+      actions: write
+    steps:
+      - name: Re-dispatch this workflow at the release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run publish.yml --repo "${{ github.repository }}" --ref "$TAG"
+
+  # The actual publish. Runs only on ``workflow_dispatch`` so that pub.dev
+  # accepts the OIDC token. The reusable workflow handles ``dart pub get``,
+  # ``dart pub publish --dry-run``, and ``dart pub publish -f`` against the
+  # OIDC-authenticated session. See
+  # https://github.com/dart-lang/setup-dart/blob/v1/.github/workflows/publish.yml
+  #
+  # ``environment: pub.dev`` is passed through so the inner job binds to
+  # the GitHub Actions environment named ``pub.dev`` (which the pub.dev
+  # policy requires).
+  publish:
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       environment: pub.dev

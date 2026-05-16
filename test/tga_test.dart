@@ -429,4 +429,104 @@ void main() {
       expect(requests, isEmpty);
     });
   });
+
+  group('array-valued properties', () {
+    test('track serialises a string list unchanged', () async {
+      final requests = <http.Request>[];
+      final client = MockClient((req) async {
+        requests.add(req);
+        return http.Response('', 202);
+      });
+      TGA.init(_apiKey, _server, client: client);
+      TGA.track(
+        'onboarding_completed',
+        'sess-1',
+        properties: {
+          'role': 'creator',
+          'interest': ['vertical_to_horizontal', 'unsure'],
+        },
+      );
+      await TGA.close();
+
+      final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
+      final props = body['properties'] as Map<String, dynamic>;
+      expect(props['role'], 'creator');
+      expect(props['interest'], ['vertical_to_horizontal', 'unsure']);
+    });
+
+    test('track preserves list order (server handles _set sort)', () async {
+      final requests = <http.Request>[];
+      final client = MockClient((req) async {
+        requests.add(req);
+        return http.Response('', 202);
+      });
+      TGA.init(_apiKey, _server, client: client);
+      TGA.track('e', 'sess-1', properties: {'tags': ['b', 'a', 'c']});
+      await TGA.close();
+
+      final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
+      expect((body['properties'] as Map)['tags'], ['b', 'a', 'c']);
+    });
+
+    test('track rejects a map inside a list', () {
+      final client = MockClient((_) async => http.Response('', 202));
+      TGA.init(_apiKey, _server, client: client);
+      expect(
+        () => TGA.track('e', 'sess-1', properties: {'tags': [{}]}),
+        throwsA(predicate(
+          (e) => e is ArgumentError && e.toString().contains('tags'),
+        )),
+      );
+    });
+
+    test('track rejects a nested list', () {
+      final client = MockClient((_) async => http.Response('', 202));
+      TGA.init(_apiKey, _server, client: client);
+      expect(
+        () => TGA.track('e', 'sess-1', properties: {'tags': [<int>[1, 2]]}),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('identify accepts a string list', () async {
+      final requests = <http.Request>[];
+      final client = MockClient((req) async {
+        requests.add(req);
+        return http.Response('', 202);
+      });
+      TGA.init(_apiKey, _server, client: client);
+      TGA.identify('sess-1', {'ab_variants': ['A', 'B']});
+      TGA.track('e', 'sess-1');
+      await TGA.close();
+
+      final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
+      expect((body['properties'] as Map)['ab_variants'], ['A', 'B']);
+    });
+
+    test('identify rejects bad value shapes', () {
+      final client = MockClient((_) async => http.Response('', 202));
+      TGA.init(_apiKey, _server, client: client);
+      expect(
+        () => TGA.identify('sess-1', {'bad': DateTime(2024)}),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('pageview rejects bad value shapes', () {
+      final client = MockClient((_) async => http.Response('', 202));
+      TGA.init(_apiKey, _server, client: client);
+      expect(
+        () => TGA.pageview('sess-1', '/x', properties: {'tags': [{}]}),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('buffered track before init still validates', () {
+      // Buffer rejects too — bad shapes surface before init.
+      expect(
+        () => TGA.track('early', 'sess-1', properties: {'bad': [{}]}),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
 }

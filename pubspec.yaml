@@ -1,6 +1,6 @@
 name: tgram_analytics
 description: Lightweight Dart/Flutter SDK for tgram-analytics, a privacy-first self-hosted analytics platform.
-version: 0.1.2
+version: 0.2.0
 homepage: https://github.com/tgram-analytics/tgram-analytics-flutter
 repository: https://github.com/tgram-analytics/tgram-analytics-flutter
 

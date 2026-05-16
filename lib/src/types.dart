@@ -6,9 +6,11 @@
 /// objects, nested lists, and other types are rejected server-side with
 /// `422`.
 ///
-/// Keys ending in `_set` are sorted alphabetically/numerically by the
-/// server at write time, so `GROUP BY properties->'foo_set'` collapses
-/// equivalent combinations into a single bucket.
+/// Every array property is sorted alphabetically/numerically by the
+/// server at write time so `GROUP BY properties->'foo'` collapses
+/// equivalent combinations into a single bucket — no naming convention
+/// required. If insertion order matters for some property, serialize the
+/// list to a string instead.
 typedef EventProperties = Map<String, Object?>;
 
 /// Configuration for the event batching queue.

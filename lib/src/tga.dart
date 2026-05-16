@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'queue.dart';
 import 'transport.dart' as transport;
 import 'types.dart';
+import 'validate.dart';
 
 final _log = Logger('tgram_analytics');
 
@@ -118,11 +119,16 @@ class TGA {
   ///
   /// This is a static convenience that delegates to the singleton instance if
   /// available, or buffers the event for later.
+  ///
+  /// Throws [ArgumentError] when [properties] contains an unsupported value
+  /// shape (e.g. a nested [Map] or [List]). Validation runs even for
+  /// pre-init buffered calls, so bad shapes surface immediately.
   static void track(
     String eventName,
     String sessionId, {
     EventProperties? properties,
   }) {
+    if (properties != null) validateProperties(properties, 'track');
     if (_instance != null) {
       _instance!._track(eventName, sessionId, properties: properties);
     } else {
@@ -145,12 +151,16 @@ class TGA {
   }
 
   /// Track a pageview event. Safe to call before [init] — events are buffered.
+  ///
+  /// Throws [ArgumentError] when [properties] contains an unsupported value
+  /// shape (e.g. a nested [Map] or [List]).
   static void pageview(
     String sessionId,
     String url, {
     String? referrer,
     EventProperties? properties,
   }) {
+    if (properties != null) validateProperties(properties, 'pageview');
     if (_instance != null) {
       _instance!._pageview(sessionId, url,
           referrer: referrer, properties: properties);
@@ -175,7 +185,11 @@ class TGA {
   }
 
   /// Attach persistent properties to a session. Safe to call before [init].
+  ///
+  /// Throws [ArgumentError] when [properties] contains an unsupported value
+  /// shape (e.g. a nested [Map] or [List]).
   static void identify(String sessionId, EventProperties properties) {
+    validateProperties(properties, 'identify');
     if (_instance != null) {
       _instance!._identify(sessionId, properties);
     } else {

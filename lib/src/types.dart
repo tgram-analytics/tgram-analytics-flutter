@@ -1,7 +1,14 @@
 /// Arbitrary key-value properties attached to events.
 ///
-/// Values must be JSON-serializable primitives: [String], [int], [double],
-/// [bool], or `null`.
+/// Values must be JSON-serializable scalars — [String], [int], [double],
+/// [bool], or `null` — **or** a [List] of those scalars (e.g. for
+/// multi-select onboarding answers or A/B variant memberships). Nested
+/// objects, nested lists, and other types are rejected server-side with
+/// `422`.
+///
+/// Keys ending in `_set` are sorted alphabetically/numerically by the
+/// server at write time, so `GROUP BY properties->'foo_set'` collapses
+/// equivalent combinations into a single bucket.
 typedef EventProperties = Map<String, Object?>;
 
 /// Configuration for the event batching queue.

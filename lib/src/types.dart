@@ -42,12 +42,12 @@ class TrackPayload {
   });
 
   Map<String, Object?> toJson() => {
-    'api_key': apiKey,
-    'event_name': eventName,
-    'session_id': sessionId,
-    'properties': properties,
-    'timestamp': timestamp,
-  };
+        'api_key': apiKey,
+        'event_name': eventName,
+        'session_id': sessionId,
+        'properties': properties,
+        'timestamp': timestamp,
+      };
 }
 
 /// Request body for `POST /api/v1/pageview`.
@@ -69,11 +69,11 @@ class PageviewPayload {
   });
 
   Map<String, Object?> toJson() => {
-    'api_key': apiKey,
-    'session_id': sessionId,
-    'url': url,
-    'referrer': referrer,
-    'timestamp': timestamp,
-    'properties': properties,
-  };
+        'api_key': apiKey,
+        'session_id': sessionId,
+        'url': url,
+        'referrer': referrer,
+        'timestamp': timestamp,
+        'properties': properties,
+      };
 }

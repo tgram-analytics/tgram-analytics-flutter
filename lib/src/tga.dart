@@ -248,10 +248,10 @@ class TGA {
     Object? batch = false,
     Duration timeout = const Duration(seconds: 10),
     http.Client? client,
-  }) : _apiKey = apiKey,
-       _serverUrl = serverUrl.replaceAll(RegExp(r'/+$'), ''),
-       _timeout = timeout,
-       _client = client ?? http.Client() {
+  })  : _apiKey = apiKey,
+        _serverUrl = serverUrl.replaceAll(RegExp(r'/+$'), ''),
+        _timeout = timeout,
+        _client = client ?? http.Client() {
     if (apiKey.isEmpty || !apiKey.startsWith('proj_')) {
       throw ArgumentError(
         "Invalid API key. Keys must start with 'proj_'. "

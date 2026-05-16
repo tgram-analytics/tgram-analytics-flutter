@@ -1,0 +1,26 @@
+name: Publish to pub.dev
+
+# Fires automatically when a GitHub release is published. To cut a new
+# version: bump the version in pubspec.yaml + CHANGELOG.md, merge, then
+# create a release at github.com/<org>/<repo>/releases/new — this
+# workflow does the rest.
+#
+# Auth: pub.dev automated publishing via OIDC. One-time setup on pub.dev:
+#   1. Sign in to pub.dev with the publisher account that owns the package.
+#   2. Go to pub.dev/packages/tgram_analytics/admin → "Automated publishing".
+#   3. Enable "Publish from GitHub Actions" with:
+#        Repository: tgram-analytics/tgram-analytics-flutter
+#        Tag pattern: v{{version}}
+#        Require GitHub Actions environment: pub.dev
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    permissions:
+      id-token: write  # required for OIDC token exchange with pub.dev
+    # The reusable workflow from the official Dart team handles tag /
+    # version verification, dart format, dart analyze, dart test, and
+    # `dart pub publish --force` against the OIDC-authenticated session.
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1

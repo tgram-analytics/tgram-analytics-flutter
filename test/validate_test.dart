@@ -27,28 +27,36 @@ void main() {
 
     test('list of strings', () {
       expect(
-        () => validateProperties({'tags': ['a', 'b', 'c']}, 'track'),
+        () => validateProperties({
+          'tags': ['a', 'b', 'c']
+        }, 'track'),
         returnsNormally,
       );
     });
 
     test('list of numbers', () {
       expect(
-        () => validateProperties({'scores': [1, 2, 3.5]}, 'track'),
+        () => validateProperties({
+          'scores': [1, 2, 3.5]
+        }, 'track'),
         returnsNormally,
       );
     });
 
     test('list of bools', () {
       expect(
-        () => validateProperties({'flags': [true, false]}, 'track'),
+        () => validateProperties({
+          'flags': [true, false]
+        }, 'track'),
         returnsNormally,
       );
     });
 
     test('heterogeneous list of scalars', () {
       expect(
-        () => validateProperties({'mixed': ['a', 1, true, null]}, 'track'),
+        () => validateProperties({
+          'mixed': ['a', 1, true, null]
+        }, 'track'),
         returnsNormally,
       );
     });
@@ -64,7 +72,9 @@ void main() {
   group('validateProperties — rejects', () {
     test('nested map value', () {
       expect(
-        () => validateProperties({'nested': {'a': 1}}, 'track'),
+        () => validateProperties({
+          'nested': {'a': 1}
+        }, 'track'),
         throwsA(predicate(
           (e) => e is ArgumentError && e.toString().contains('nested'),
         )),
@@ -73,7 +83,9 @@ void main() {
 
     test('map inside list', () {
       expect(
-        () => validateProperties({'tags': [{}]}, 'track'),
+        () => validateProperties({
+          'tags': [{}]
+        }, 'track'),
         throwsA(predicate(
           (e) => e is ArgumentError && e.toString().contains('tags'),
         )),
@@ -82,7 +94,11 @@ void main() {
 
     test('list inside list', () {
       expect(
-        () => validateProperties({'tags': [<int>[1, 2]]}, 'track'),
+        () => validateProperties({
+          'tags': [
+            <int>[1, 2]
+          ]
+        }, 'track'),
         throwsA(predicate(
           (e) => e is ArgumentError && e.toString().contains('tags'),
         )),
@@ -91,7 +107,9 @@ void main() {
 
     test('error message names the bad index', () {
       try {
-        validateProperties({'tags': ['a', {}]}, 'track');
+        validateProperties({
+          'tags': ['a', {}]
+        }, 'track');
         fail('expected throw');
       } on ArgumentError catch (e) {
         expect(e.toString(), contains('1'));

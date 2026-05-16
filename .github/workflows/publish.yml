@@ -1,9 +1,13 @@
 name: Publish to pub.dev
 
-# Fires automatically when a GitHub release is published. To cut a new
-# version: bump the version in pubspec.yaml + CHANGELOG.md, merge, then
-# create a release at github.com/<org>/<repo>/releases/new — this
-# workflow does the rest.
+# Fires automatically when a Git tag matching ``v<version>`` is pushed.
+# Creating a GitHub release with that tag is the recommended way to cut
+# a version (the release machinery pushes the tag for us).
+#
+# IMPORTANT: pub.dev's OIDC policy rejects ``release`` events with
+# "this token originates from a 'release' event" — only ``push`` (tag)
+# and ``workflow_dispatch`` event tokens are honoured. See:
+# https://dart.dev/go/publishing-from-github
 #
 # Auth: pub.dev automated publishing via OIDC. One-time setup on pub.dev:
 #   1. Sign in to pub.dev with the publisher account that owns the package.
@@ -13,8 +17,12 @@ name: Publish to pub.dev
 #        Tag pattern: v{{version}}
 #        Require GitHub Actions environment: pub.dev
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  # Allow manual re-runs from the Actions tab for a specific ref. Pick the
+  # tag you want to (re-)publish under "Use workflow from".
+  workflow_dispatch:
 
 jobs:
   publish:

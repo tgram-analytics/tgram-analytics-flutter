@@ -98,7 +98,9 @@ TGA.track(
   'session-123',
   properties: {
     'role': 'creator',
-    'interest_set': ['vertical_to_horizontal', 'unsure'],
+    // Plain 'interest' — the server sorts every array at write time,
+    // so no special key convention is needed.
+    'interest': ['vertical_to_horizontal', 'unsure'],
   },
 );
 ```
@@ -108,12 +110,12 @@ Allowed value shapes:
 | Shape | Allowed? | Example |
 |---|---|---|
 | Scalar (`String`, `int`, `double`, `bool`, `null`) | ✅ | `{'amount': 49}` |
-| List of scalars | ✅ | `{'tags_set': ['a', 'b']}` |
+| List of scalars | ✅ | `{'tags': ['a', 'b']}` |
 | Nested `Map` | ❌ — throws `ArgumentError` | `{'user': {'id': 1}}` |
 | Nested `List` | ❌ — throws `ArgumentError` | `{'matrix': [[1, 2]]}` |
 | `double.nan` / `double.infinity` | ❌ — throws `ArgumentError` | `{'x': double.nan}` |
 
-Keys ending in `_set` are sorted alphabetically/numerically by the server at write time, so `GROUP BY properties->'interest_set'` collapses `['a', 'b']` and `['b', 'a']` into one bucket. Other list properties keep insertion order.
+The server **sorts every array property at write time**, so `['a', 'b']` and `['b', 'a']` collapse to the same JSONB value and `GROUP BY properties->'interest'` is a trivial combo query. If insertion order matters (e.g. `recent_searches: ['pizza', 'pasta']`), serialize to a string or use a `Map` with positional keys — every list gets sorted regardless of key name.
 
 ---
 

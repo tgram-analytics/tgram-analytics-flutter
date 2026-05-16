@@ -461,7 +461,9 @@ void main() {
         return http.Response('', 202);
       });
       TGA.init(_apiKey, _server, client: client);
-      TGA.track('e', 'sess-1', properties: {'tags': ['b', 'a', 'c']});
+      TGA.track('e', 'sess-1', properties: {
+        'tags': ['b', 'a', 'c']
+      });
       await TGA.close();
 
       final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
@@ -472,7 +474,9 @@ void main() {
       final client = MockClient((_) async => http.Response('', 202));
       TGA.init(_apiKey, _server, client: client);
       expect(
-        () => TGA.track('e', 'sess-1', properties: {'tags': [{}]}),
+        () => TGA.track('e', 'sess-1', properties: {
+          'tags': [{}]
+        }),
         throwsA(predicate(
           (e) => e is ArgumentError && e.toString().contains('tags'),
         )),
@@ -483,7 +487,11 @@ void main() {
       final client = MockClient((_) async => http.Response('', 202));
       TGA.init(_apiKey, _server, client: client);
       expect(
-        () => TGA.track('e', 'sess-1', properties: {'tags': [<int>[1, 2]]}),
+        () => TGA.track('e', 'sess-1', properties: {
+          'tags': [
+            <int>[1, 2]
+          ]
+        }),
         throwsA(isA<ArgumentError>()),
       );
     });
@@ -495,7 +503,9 @@ void main() {
         return http.Response('', 202);
       });
       TGA.init(_apiKey, _server, client: client);
-      TGA.identify('sess-1', {'ab_variants': ['A', 'B']});
+      TGA.identify('sess-1', {
+        'ab_variants': ['A', 'B']
+      });
       TGA.track('e', 'sess-1');
       await TGA.close();
 
@@ -516,7 +526,9 @@ void main() {
       final client = MockClient((_) async => http.Response('', 202));
       TGA.init(_apiKey, _server, client: client);
       expect(
-        () => TGA.pageview('sess-1', '/x', properties: {'tags': [{}]}),
+        () => TGA.pageview('sess-1', '/x', properties: {
+          'tags': [{}]
+        }),
         throwsA(isA<ArgumentError>()),
       );
     });
@@ -524,7 +536,9 @@ void main() {
     test('buffered track before init still validates', () {
       // Buffer rejects too — bad shapes surface before init.
       expect(
-        () => TGA.track('early', 'sess-1', properties: {'bad': [{}]}),
+        () => TGA.track('early', 'sess-1', properties: {
+          'bad': [{}]
+        }),
         throwsA(isA<ArgumentError>()),
       );
     });

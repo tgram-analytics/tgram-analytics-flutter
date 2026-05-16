@@ -137,8 +137,7 @@ void main() {
       });
       await queue.flush();
 
-      final body =
-          jsonDecode(requests.first.body) as Map<String, dynamic>;
+      final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
       expect(body['api_key'], 'proj_test');
       expect(body['event_name'], 'click');
     });

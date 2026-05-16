@@ -1,0 +1,36 @@
+name: Publish to pub.dev
+
+# Fires automatically when a GitHub release is published. To cut a new
+# version: bump the version in pubspec.yaml + CHANGELOG.md, merge, then
+# create a release at github.com/<org>/<repo>/releases/new — this
+# workflow does the rest.
+#
+# Auth: pub.dev automated publishing via OIDC. One-time setup on pub.dev:
+#   1. Sign in to pub.dev with the publisher account that owns the package.
+#   2. Go to pub.dev/packages/tgram_analytics/admin → "Automated publishing".
+#   3. Enable "Publish from GitHub Actions" with:
+#        Repository: tgram-analytics/tgram-analytics-flutter
+#        Tag pattern: v{{version}}
+#        Require GitHub Actions environment: pub.dev
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    permissions:
+      id-token: write  # required for OIDC token exchange with pub.dev
+    # The reusable workflow from the official Dart team handles
+    # `dart pub get`, `dart pub publish --dry-run`, and `dart pub publish -f`
+    # against the OIDC-authenticated session. See
+    # https://github.com/dart-lang/setup-dart/blob/v1/.github/workflows/publish.yml
+    #
+    # `environment: pub.dev` is passed through to the inner job so it binds
+    # to the GitHub Actions environment named `pub.dev`. That match is
+    # required because the pub.dev automated-publishing config above is set
+    # with "Require GitHub Actions environment: pub.dev" — without this
+    # `with:` block the inner job runs with no environment and the OIDC
+    # token exchange is rejected by pub.dev.
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      environment: pub.dev

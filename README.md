@@ -115,7 +115,7 @@ Allowed value shapes:
 | Nested `List` | ❌ — throws `ArgumentError` | `{'matrix': [[1, 2]]}` |
 | `double.nan` / `double.infinity` | ❌ — throws `ArgumentError` | `{'x': double.nan}` |
 
-The server **sorts every array property at write time**, so `['a', 'b']` and `['b', 'a']` collapse to the same JSONB value and `GROUP BY properties->'interest'` is a trivial combo query. If insertion order matters (e.g. `recent_searches: ['pizza', 'pasta']`), serialize to a string or use a `Map` with positional keys — every list gets sorted regardless of key name.
+The server **sorts every array property at write time**, so `['a', 'b']` and `['b', 'a']` collapse to the same JSONB value and `GROUP BY properties->'interest'` is a trivial combo query. If insertion order matters (e.g. `recent_searches: ['pizza', 'pasta']`), serialize to a string — every list gets sorted regardless of key name (and nested `Map`s aren't accepted as property values).
 
 ---
 

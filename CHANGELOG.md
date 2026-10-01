@@ -1,3 +1,7 @@
+## 0.3.0
+
+- **Test mode.** New `test` option on `TGA.init()`. When `true`, every request body includes `"test": true`, so the server stores the event but excludes it from analytics. Use `test: kDebugMode` to keep debug builds out of your numbers. When `false` (default), the field is omitted and requests are unchanged. Servers that do not know the field ignore it.
+
 ## 0.2.0
 
 - **Multi-value event properties.** `EventProperties` now officially supports `List` values containing scalars (`String`, `int`, `double`, `bool`, `null`) — useful for multi-select onboarding answers, A/B variant memberships, and any set-style attribute that previously needed lossy workarounds:

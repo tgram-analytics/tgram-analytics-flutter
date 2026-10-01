@@ -72,6 +72,20 @@ The queue flushes automatically when `maxSize` is reached or `maxWait` elapses.
 
 ---
 
+## Test mode
+
+Keep events from debug builds out of your analytics:
+
+```dart
+import 'package:flutter/foundation.dart';
+
+TGA.init('proj_xxx', 'https://your-server.com', test: kDebugMode);
+```
+
+With `test: true`, every request includes `"test": true`. The server stores test events, but analytics ignore them. Recent activity, `/doctor`, and the MCP `recent_events` and `verify_integration` tools still show them, marked 🧪.
+
+---
+
 ## Identifying users
 
 Attach persistent properties to a session. All subsequent `track()` and `pageview()` calls for that session include them:
@@ -121,12 +135,13 @@ The server **sorts every array property at write time**, so `['a', 'b']` and `['
 
 ## API reference
 
-### `TGA.init(apiKey, serverUrl, {batch, timeout, client})`
+### `TGA.init(apiKey, serverUrl, {batch, timeout, test, client})`
 
 Initialize the singleton. `apiKey` must start with `"proj_"`.
 
 - `batch` — `false` (default), `true` (default thresholds), or a `BatchOptions` instance.
 - `timeout` — HTTP timeout (default 10 seconds).
+- `test` — when `true`, marks every event as a test event (see [Test mode](#test-mode)). Default `false`.
 - `client` — optional `http.Client` for testing or custom configuration.
 
 If already initialized, logs a warning and returns the existing instance.

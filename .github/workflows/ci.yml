@@ -11,6 +11,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # The repository's Actions policy allows only GitHub-owned and
+    # Marketplace-verified actions, so dart-lang/setup-dart is not usable.
+    # The official Dart Docker image provides the SDK instead.
+    container:
+      image: dart:${{ matrix.sdk }}
     strategy:
       fail-fast: false
       matrix:
@@ -18,9 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ matrix.sdk }}
+      - name: Show Dart version
+        run: dart --version
 
       - name: Resolve dependencies
         run: dart pub get

@@ -543,4 +543,81 @@ void main() {
       );
     });
   });
+
+  group('test mode', () {
+    MockClient recording(List<http.Request> requests) =>
+        MockClient((req) async {
+          requests.add(req);
+          return http.Response('', 202);
+        });
+
+    test('omits test field by default', () async {
+      final requests = <http.Request>[];
+      TGA.init(_apiKey, _server, client: recording(requests));
+      TGA.track('signup', 'sess-1');
+      TGA.pageview('sess-1', '/home');
+      await TGA.close();
+
+      expect(requests, hasLength(2));
+      for (final req in requests) {
+        final body = jsonDecode(req.body) as Map<String, dynamic>;
+        expect(body.containsKey('test'), isFalse);
+      }
+    });
+
+    test('omits test field when test is false', () async {
+      final requests = <http.Request>[];
+      TGA.init(_apiKey, _server, test: false, client: recording(requests));
+      TGA.track('signup', 'sess-1');
+      await TGA.close();
+
+      final body = jsonDecode(requests.single.body) as Map<String, dynamic>;
+      expect(body.containsKey('test'), isFalse);
+    });
+
+    test('track and pageview include test: true when enabled', () async {
+      final requests = <http.Request>[];
+      TGA.init(_apiKey, _server, test: true, client: recording(requests));
+      TGA.track('signup', 'sess-1');
+      TGA.pageview('sess-1', '/home');
+      await TGA.close();
+
+      expect(requests, hasLength(2));
+      for (final req in requests) {
+        final body = jsonDecode(req.body) as Map<String, dynamic>;
+        expect(body['test'], isTrue);
+      }
+    });
+
+    test('batched events include test: true when enabled', () async {
+      final requests = <http.Request>[];
+      TGA.init(_apiKey, _server,
+          test: true, batch: true, client: recording(requests));
+      TGA.track('a', 'sess-1');
+      TGA.pageview('sess-1', '/b');
+      await TGA.flush();
+
+      expect(requests, hasLength(2));
+      for (final req in requests) {
+        final body = jsonDecode(req.body) as Map<String, dynamic>;
+        expect(body['test'], isTrue);
+      }
+      await TGA.close();
+    });
+
+    test('events buffered before init include test: true', () async {
+      TGA.track('early', 'sess-1');
+      TGA.pageview('sess-1', '/early');
+
+      final requests = <http.Request>[];
+      TGA.init(_apiKey, _server, test: true, client: recording(requests));
+      await TGA.close();
+
+      expect(requests, hasLength(2));
+      for (final req in requests) {
+        final body = jsonDecode(req.body) as Map<String, dynamic>;
+        expect(body['test'], isTrue);
+      }
+    });
+  });
 }

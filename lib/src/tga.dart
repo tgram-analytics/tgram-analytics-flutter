@@ -69,6 +69,10 @@ class TGA {
   /// [batch] can be `false` (default, send immediately), `true` (use default
   /// [BatchOptions]), or a [BatchOptions] instance.
   /// [timeout] is the HTTP request timeout (default 10 seconds).
+  /// [test] marks every event sent by this client as a test event
+  /// (`"test": true` in the request body). The server stores test events but
+  /// excludes them from analytics. Useful for debug builds, e.g.
+  /// `test: kDebugMode`. When `false` (default) the field is omitted.
   ///
   /// If already initialized, logs a warning and returns the existing instance.
   /// Any events tracked before this call are flushed automatically.
@@ -77,6 +81,7 @@ class TGA {
     String serverUrl, {
     Object? batch = false,
     Duration timeout = const Duration(seconds: 10),
+    bool test = false,
     http.Client? client,
   }) {
     if (_instance != null) {
@@ -91,6 +96,7 @@ class TGA {
       serverUrl,
       batch: batch,
       timeout: timeout,
+      test: test,
       client: client,
     );
 
@@ -238,6 +244,7 @@ class TGA {
   final String _serverUrl;
   final http.Client _client;
   final Duration _timeout;
+  final bool _test;
   final Map<String, EventProperties> _sessionProperties = {};
   final Set<Future<void>> _inflight = {};
   EventQueue? _queue;
@@ -247,10 +254,12 @@ class TGA {
     String serverUrl, {
     Object? batch = false,
     Duration timeout = const Duration(seconds: 10),
+    bool test = false,
     http.Client? client,
   })  : _apiKey = apiKey,
         _serverUrl = serverUrl.replaceAll(RegExp(r'/+$'), ''),
         _timeout = timeout,
+        _test = test,
         _client = client ?? http.Client() {
     if (apiKey.isEmpty || !apiKey.startsWith('proj_')) {
       throw ArgumentError(
@@ -345,6 +354,7 @@ class TGA {
   void _dispatch(String endpoint, Map<String, Object?> payload) {
     // Stamp the real API key on buffered events that had a placeholder.
     payload['api_key'] = _apiKey;
+    if (_test) payload['test'] = true;
 
     if (_queue != null) {
       _queue!.push(endpoint, payload);
